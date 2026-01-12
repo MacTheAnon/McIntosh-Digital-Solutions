@@ -21,7 +21,7 @@ public class StripeService {
 
     public Session createCheckoutSession(String clientEmail) throws Exception {
         // Use localhost for testing so the redirect works on your machine
-        String baseUrl = "http://localhost:3000"; 
+        String baseUrl = "https://mcintosh-digital-solutions.up.railway.app"; 
 
         SessionCreateParams params = SessionCreateParams.builder()
             .setMode(SessionCreateParams.Mode.PAYMENT)

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/bookings")
 // Ensure this matches your React frontend URL exactly
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://mcintosh-digital-solutions.up.railway.app")
 public class BookingController {
 
     @Autowired

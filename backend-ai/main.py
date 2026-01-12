@@ -18,7 +18,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 3. Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["https://mcintosh-digital-solutions.up.railway.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
