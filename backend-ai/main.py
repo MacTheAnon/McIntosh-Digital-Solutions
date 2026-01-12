@@ -66,9 +66,9 @@ async def game_endpoint(request: GameRequest):
 
 # 5. Production Execution Block
 # This block fixes the 502 Bad Gateway by binding correctly to Railway's environment
+# backend-ai/main.py
 if __name__ == "__main__":
-    # Railway passes a PORT environment variable. We MUST use it.
+    import uvicorn
+    # This force-binds the app to 0.0.0.0 and the Railway PORT variable
     port = int(os.getenv("PORT", 8080))
-    # 'main:app' refers to this file (main.py) and the FastAPI instance (app)
-    # host='0.0.0.0' is required for Railway to route traffic to the container
     uvicorn.run("main:app", host="0.0.0.0", port=port, proxy_headers=True)
