@@ -10,10 +10,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://mcintosh-digital-solutions.up.railway.app", "http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // OPTIONS is critical!
+                .allowedOrigins("https://mcintosh-digital-solutions.up.railway.app")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
-                .maxAge(3600); // Caches the handshake for 1 hour
+                .maxAge(3600); // Optimized for production
     }
 }
