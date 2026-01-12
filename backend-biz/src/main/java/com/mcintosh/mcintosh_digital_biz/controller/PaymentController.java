@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*") // For development; replace with your specific URL for production
+@CrossOrigin(origins = "*") 
 public class PaymentController {
 
     @Value("${STRIPE_SECRET_KEY}")
@@ -19,14 +19,12 @@ public class PaymentController {
 
     @PostMapping("/create-session")
     public Map<String, String> createCheckoutSession() {
-        // Use the key injected from Railway environment variables
         Stripe.apiKey = stripeSecretKey;
-        
         Map<String, String> responseData = new HashMap<>();
 
         try {
             SessionCreateParams params = SessionCreateParams.builder()
-                .addAllowedPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl("https://mcintosh-digital-solutions.up.railway.app/?success=true")
                 .setCancelUrl("https://mcintosh-digital-solutions.up.railway.app/?canceled=true")
@@ -56,5 +54,10 @@ public class PaymentController {
             responseData.put("error", e.getMessage());
             return responseData;
         }
+    }
+
+    @GetMapping("/health")
+    public String health() {
+        return "Backend System Integrity: 100%";
     }
 }
