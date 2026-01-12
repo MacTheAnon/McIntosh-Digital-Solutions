@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, HTTPException
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from services.ai_engine import get_ai_response
 from services.game_logic import process_guess
@@ -16,12 +17,19 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# 3. Middleware: URL Sanitization for Railway
-frontend_url = os.getenv("FRONTEND_URL", "https://mcintosh-digital-solutions.up.railway.app")
+# 3. Middleware: Security & CORS Alignment
+# Ensure there is NO trailing slash in the FRONTEND_URL
+raw_frontend_url = os.getenv("FRONTEND_URL", "https://mcintosh-digital-solutions.up.railway.app")
+frontend_url = raw_frontend_url.rstrip("/")
+
+origins = [
+    frontend_url,
+    "http://localhost:3000"  # Allow local development testing
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,13 +41,15 @@ class ChatRequest(BaseModel):
 class GameRequest(BaseModel):
     guess: str
 
+# 4. Endpoints
 @app.get("/")
 def read_root():
+    """Handshake endpoint for Navbar status verification"""
     return {"status": "online", "service": "McIntosh AI Engine"}
 
 @app.post("/chat")
 @limiter.limit("10/minute")
-async def chat_endpoint(request: ChatRequest):
+async def chat_endpoint(request: ChatRequest, req: Request):
     try:
         # Pass the raw string to the engine
         response = get_ai_response(request.message)
@@ -47,9 +57,18 @@ async def chat_endpoint(request: ChatRequest):
         return {"reply": response}
     except Exception as e:
         print(f"CRITICAL SYSTEM ERROR: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Intelligence Engine Latency: Please try again.")
 
 @app.post("/game/attempt")
 async def game_endpoint(request: GameRequest):
     result = process_guess(request.guess)
     return result
+
+# 5. Production Execution Block
+# This block fixes the 502 Bad Gateway by binding correctly to Railway's environment
+if __name__ == "__main__":
+    # Railway passes a PORT environment variable. We MUST use it.
+    port = int(os.getenv("PORT", 8080))
+    # 'main:app' refers to this file (main.py) and the FastAPI instance (app)
+    # host='0.0.0.0' is required for Railway to route traffic to the container
+    uvicorn.run("main:app", host="0.0.0.0", port=port, proxy_headers=True)
