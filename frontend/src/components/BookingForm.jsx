@@ -1,29 +1,45 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ShieldCheck, ChevronRight, CreditCard } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js'; // <--- MUST HAVE THIS
 
 const BookingForm = () => {
     const [loading, setLoading] = useState(false);
+    const [userEmail, setUserEmail] = useState("admin@mcintosh.com"); // Placeholder or link to an input
 
     const handlePayment = async () => {
-    setLoading(true);
-    try {
-        const response = await fetch(`${process.env.REACT_APP_BIZ_BACKEND_URL}/api/bookings/initiate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                clientEmail: "client@example.com",
-                taskDescription: "Executive Project Retainer"
-            })
-        });
-        const paymentUrl = await response.text();
-        if (paymentUrl.startsWith("http")) window.location.href = paymentUrl;
-    } catch (error) {
-        console.error("Gateway Offline");
-    } finally {
-        setLoading(false);
-    }
-};
+        setLoading(true);
+        console.log("Initiating Payment Protocol...");
+        console.log("Backend URL:", process.env.REACT_APP_BIZ_BACKEND_URL);
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BIZ_BACKEND_URL}/api/bookings/create-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail })
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server Error: ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log("Session Data Received:", data);
+            
+            if (data.sessionId) {
+                const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+                await stripe.redirectToCheckout({ sessionId: data.sessionId });
+            } else {
+                console.error("No Session ID returned from Java backend.");
+            }
+        } catch (error) {
+            console.error("Payment Protocol Failed:", error);
+            alert("Payment Gateway Offline. Check Java Backend Logs.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="w-full px-4 md:px-0">
@@ -41,12 +57,12 @@ const BookingForm = () => {
                     </div>
                 </div>
 
-                <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-4 mb-6">
+                <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-4 mb-6 text-left">
                     <div className="flex justify-between items-center mb-1">
                         <span className="text-slate-400 text-xs">Standard Retainer</span>
                         <span className="text-white font-mono font-bold">$100.00</span>
                     </div>
-                    <p className="text-[10px] text-slate-500 text-left italic">* Non-refundable integration fee</p>
+                    <p className="text-[10px] text-slate-500 italic">* Non-refundable integration fee</p>
                 </div>
 
                 <button 
