@@ -1,0 +1,22 @@
+@layer utilities {
+  /* Soft pulse for the logo image */
+  @keyframes soft-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 174, 239, 0.4)); }
+    50% { transform: scale(1.02); filter: drop-shadow(0 0 30px rgba(0, 174, 239, 0.8)); }
+  }
+
+  /* Scanning line moving top to bottom */
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .animate-soft-pulse {
+    animation: soft-pulse 4s ease-in-out infinite;
+  }
+
+  .animate-scan {
+    animation: scan 3s linear infinite;
+  }
+}

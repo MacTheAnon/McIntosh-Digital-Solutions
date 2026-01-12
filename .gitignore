@@ -1,0 +1,28 @@
+# --- System / IDE ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# --- Frontend (React) ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+
+# --- AI Backend (Python) ---
+backend-ai/__pycache__/
+backend-ai/venv/
+backend-ai/.env
+backend-ai/*.pyc
+
+# --- Business Backend (Java) ---
+backend-biz/target/
+backend-biz/.mvn/
+backend-biz/*.jar
+backend-biz/*.class
+backend-biz/application.properties.local
+
+# --- Global Secrets ---
+.env

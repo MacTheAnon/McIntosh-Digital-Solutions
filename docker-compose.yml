@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Business Logic (Java Spring Boot)
+  backend-biz:
+    build: ./backend-biz
+    ports:
+      - "8080:8080"
+    environment:
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+
+  # AI Engine & Game (Python FastAPI)
+  backend-ai:
+    build: ./backend-ai
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+  # Frontend UI (React)
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend-biz
+      - backend-ai
