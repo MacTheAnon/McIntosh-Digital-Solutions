@@ -35,6 +35,7 @@ public class StripeService {
             throw new IllegalStateException("Stripe API Key is not configured. Protocol aborted.");
         }
 
+        // Executive Redirect: Points to your React Router /success path
         String baseUrl = "https://mcintosh-digital-solutions.up.railway.app"; 
 
         SessionCreateParams params = SessionCreateParams.builder()
@@ -42,14 +43,14 @@ public class StripeService {
             .setSuccessUrl(baseUrl + "/success")
             .setCancelUrl(baseUrl + "/")
             .setCustomerEmail(clientEmail)
-            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD) // Updated for SDK v24+
+            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD) 
             .addLineItem(
                 SessionCreateParams.LineItem.builder()
                     .setQuantity(1L)
                     .setPriceData(
                         SessionCreateParams.LineItem.PriceData.builder()
                             .setCurrency("usd")
-                            .setUnitAmount(10000L) // $100.00
+                            .setUnitAmount(10000L) // $100.00 represented in cents
                             .setProductData(
                                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
                                     .setName("Project Deposit - McIntosh Digital Solutions")

@@ -9,8 +9,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // Allows the frontend to communicate with all backend endpoints
         registry.addMapping("/**")
-                .allowedOrigins("https://mcintosh-digital-solutions.up.railway.app") // Your exact frontend URL
+                .allowedOrigins("https://mcintosh-digital-solutions.up.railway.app") 
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
