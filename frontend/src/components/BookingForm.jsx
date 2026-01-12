@@ -11,12 +11,9 @@ const BookingForm = () => {
         setLoading(true);
         console.log("Initiating Payment Protocol...");
         
-        // Remove trailing slash if present to prevent double-slash errors
         const backendUrl = process.env.REACT_APP_BIZ_BACKEND_URL.replace(/\/$/, "");
-        console.log("Backend URL:", backendUrl);
 
         try {
-            // FIX 1: Updated endpoint from 'bookings' to 'payments' to match Java Controller
             const response = await fetch(`${backendUrl}/api/payments/create-session`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -31,13 +28,12 @@ const BookingForm = () => {
             const data = await response.json();
             console.log("Session Data Received:", data);
             
-            // FIX 2: Check for 'id' (what Java sends) instead of 'sessionId'
-            if (data.id) {
-                const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
-                await stripe.redirectToCheckout({ sessionId: data.id });
+            // FIX: Redirect directly to the URL provided by the backend
+            if (data.url) {
+                window.location.href = data.url; 
             } else {
-                console.error("No Session ID returned. Payload:", data);
-                alert("Payment Protocol Error: Invalid Session ID");
+                console.error("No Payment URL returned. Payload:", data);
+                alert("Payment Protocol Error: Invalid Session URL");
             }
 
         } catch (error) {
@@ -47,7 +43,6 @@ const BookingForm = () => {
             setLoading(false);
         }
     };
-
     return (
         <div className="w-full px-4 md:px-0">
             <motion.div 
