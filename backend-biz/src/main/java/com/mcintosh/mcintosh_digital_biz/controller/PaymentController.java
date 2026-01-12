@@ -28,13 +28,13 @@ public class PaymentController {
             // Extracts the client email sent from your BookingForm.jsx
             String email = request.get("email");
             if (email == null || email.isEmpty()) {
-                email = "client@mcintosh-digital.com"; // Fallback for testing
+                email = "client@mcintosh-digital.com"; // Default fallback
             }
 
-            // Calls the Service logic we just built
+            // Delegating the heavy lifting to the StripeService
             Session session = stripeService.createCheckoutSession(email);
             
-            // Returns the session ID back to the frontend
+            // Return only the session ID to the frontend
             response.put("id", session.getId());
             return response;
 
@@ -49,3 +49,4 @@ public class PaymentController {
         return "Backend System Integrity: 100%";
     }
 }
+                    
