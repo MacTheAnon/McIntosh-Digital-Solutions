@@ -5,7 +5,7 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct; // <--- CRITICAL FIX FOR SPRING BOOT 3
 
 @Service
 public class StripeService {
@@ -20,7 +20,7 @@ public class StripeService {
     }
 
     public Session createCheckoutSession(String clientEmail) throws Exception {
-        // FIX: Use localhost for testing, change to real domain for production
+        // Use localhost for testing so the redirect works on your machine
         String baseUrl = "http://localhost:3000"; 
 
         SessionCreateParams params = SessionCreateParams.builder()

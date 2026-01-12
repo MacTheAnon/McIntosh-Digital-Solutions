@@ -6,56 +6,48 @@ const BookingForm = () => {
     const handlePayment = async () => {
         setLoading(true);
         try {
-            // FIX: Updated URL to match BookingController.java
+            // FIX 1: Removed the trailing dot from the URL
             const response = await fetch('http://localhost:8080/api/bookings/initiate', {
                 method: 'POST',
+                // FIX 2: Added headers and body to send the required data
                 headers: { 'Content-Type': 'application/json' },
-                // Sending a default email for the deposit (in prod, add an input field)
-                body: JSON.stringify({ clientEmail: "client@example.com" })
+                body: JSON.stringify({ 
+                    clientEmail: "client@example.com", // In a real app, get this from an input field
+                    taskDescription: "Initial Project Deposit"
+                })
             });
-            
-            if (!response.ok) throw new Error("Connection Refused");
 
-            // The backend returns a plain text URL, not JSON {url: ...} based on your Controller logic
-            // We need to handle both just in case, but your Java returns plain String.
-            const text = await response.text(); 
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            // FIX 3: Backend returns a plain text URL, not JSON. Use response.text()
+            const paymentUrl = await response.text();
             
-            if (text.startsWith("http")) {
-                window.location.href = text; // Redirect to Stripe
+            if (paymentUrl.startsWith("http")) {
+                window.location.href = paymentUrl; // Redirect to Stripe
             } else {
-                console.error("Invalid URL received:", text);
-                alert("Payment gateway error. Please try again.");
+                console.error("Invalid URL received:", paymentUrl);
+                alert("Payment system error.");
             }
         } catch (error) {
             console.error("Payment redirect failed:", error);
-            alert("Secure Payment Gateway Offline. Connecting to backup...");
+            alert("Payment gateway offline. Please contact support.");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="h-full bg-slate-900/50 p-6 rounded-xl border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] flex flex-col justify-between">
-            <div>
-                <h3 className="text-xl font-mono font-bold text-emerald-400 mb-2 border-b border-emerald-500/20 pb-2">
-                    > DEPLOY_PROJECT
-                </h3>
-                <p className="text-slate-400 text-sm mb-4">
-                    Initiate secure handshake. $100 deposit required to allocate development resources.
-                </p>
-                <ul className="text-xs text-slate-500 space-y-2 mb-6 font-mono">
-                    <li>[✓] SSL ENCRYPTED</li>
-                    <li>[✓] STRIPE SECURE</li>
-                    <li>[✓] INSTANT ALLOCATION</li>
-                </ul>
-            </div>
+        <div className="bg-gray-800 p-6 rounded-lg border-l-4 border-green-500 shadow-lg">
+            <h3 className="text-xl font-bold text-white mb-2">Project Initiation</h3>
+            <p className="text-gray-400 mb-4">Secure $100 deposit to begin your AI implementation.</p>
             <button 
                 onClick={handlePayment}
                 disabled={loading}
-                className="w-full bg-emerald-600/20 hover:bg-emerald-600 hover:text-white text-emerald-400 border border-emerald-500 font-mono font-bold py-3 px-4 rounded transition duration-300 flex justify-center items-center gap-2 group"
+                className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded transition duration-200 disabled:opacity-50"
             >
-                {loading ? "CONNECTING..." : "INITIALIZE PROTOCOL"}
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
+                {loading ? "Processing..." : "Secure with Stripe"}
             </button>
         </div>
     );
