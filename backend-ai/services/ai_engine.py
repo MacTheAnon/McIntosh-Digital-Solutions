@@ -13,7 +13,8 @@ def get_ai_response(message_history):
     }
     
     # Prepend system prompt to the history
-    messages = [system_prompt] + message_history
+    # In ai_engine.py
+    messages = [system_prompt, {"role": "user", "content": message_history}]
     
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",

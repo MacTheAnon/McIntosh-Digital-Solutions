@@ -3,7 +3,7 @@ import React from 'react';
 const BookingForm = () => {
     const handlePayment = async () => {
         try {
-            const response = await fetch('http://localhost:8080/api/payments/create-checkout-session', {
+            const response = await fetch('http://localhost:8080/api/bookings/initiate.', {
                 method: 'POST',
             });
             const data = await response.json();
