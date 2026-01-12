@@ -6,42 +6,78 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Force dark mode globally */
 body {
   margin: 0;
   padding: 0;
-  background-color: #020617; /* Very dark slate/black */
-  color: #f8fafc; /* Light slate text */
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #020617; 
+  color: #f8fafc;
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom glow effect for cybersecurity feel */
+/* --- EXECUTIVE GLASS UTILITY --- */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* --- CYBER BORDER --- */
 .cyber-border {
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+/* --- THE SCANNER LOGIC --- */
+.scan-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-container::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #3b82f6, transparent);
+  box-shadow: 0 0 15px 1px #3b82f6;
+  animation: scan-line 4s linear infinite;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+@keyframes scan-line {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { top: 100%; opacity: 0; }
 }
 
 @layer utilities {
-  /* Soft pulse for the logo image */
   @keyframes soft-pulse {
     0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 174, 239, 0.4)); }
-    50% { transform: scale(1.02); filter: drop-shadow(0 0 30px rgba(0, 174, 239, 0.8)); }
-  }
-
-  /* Scanning line moving top to bottom */
-  @keyframes scan {
-    0% { top: 0%; opacity: 0; }
-    50% { opacity: 1; }
-    100% { top: 100%; opacity: 0; }
+    50% { transform: scale(1.01); filter: drop-shadow(0 0 25px rgba(0, 174, 239, 0.7)); }
   }
 
   .animate-soft-pulse {
     animation: soft-pulse 4s ease-in-out infinite;
   }
+}
 
-  .animate-scan {
-    animation: scan 3s linear infinite;
-  }
+/* --- PREMIUM SCROLLBAR --- */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
 }
