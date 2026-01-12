@@ -9,11 +9,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // Allows the frontend to communicate with all backend endpoints
         registry.addMapping("/**")
-                .allowedOrigins("https://mcintosh-digital-solutions.up.railway.app") 
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedOrigins("https://mcintosh-digital-solutions.up.railway.app", "http://localhost:3000")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // OPTIONS is critical!
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowCredentials(true)
+                .maxAge(3600); // Caches the handshake for 1 hour
     }
 }
