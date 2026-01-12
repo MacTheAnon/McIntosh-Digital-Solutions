@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ShieldCheck, ChevronRight, CreditCard } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js'; // <--- MUST HAVE THIS
+import { loadStripe } from '@stripe/stripe-js';
 
 const BookingForm = () => {
     const [loading, setLoading] = useState(false);
-    const [userEmail, setUserEmail] = useState("admin@mcintosh.com"); // Placeholder or link to an input
+    const [userEmail, setUserEmail] = useState("admin@mcintosh.com");
 
     const handlePayment = async () => {
         setLoading(true);
         console.log("Initiating Payment Protocol...");
-        console.log("Backend URL:", process.env.REACT_APP_BIZ_BACKEND_URL);
+        
+        // Remove trailing slash if present to prevent double-slash errors
+        const backendUrl = process.env.REACT_APP_BIZ_BACKEND_URL.replace(/\/$/, "");
+        console.log("Backend URL:", backendUrl);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_BIZ_BACKEND_URL}/api/bookings/create-session`, {
+            // FIX 1: Updated endpoint from 'bookings' to 'payments' to match Java Controller
+            const response = await fetch(`${backendUrl}/api/payments/create-session`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: userEmail })
@@ -27,15 +31,18 @@ const BookingForm = () => {
             const data = await response.json();
             console.log("Session Data Received:", data);
             
-            if (data.sessionId) {
+            // FIX 2: Check for 'id' (what Java sends) instead of 'sessionId'
+            if (data.id) {
                 const stripe = await loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
-                await stripe.redirectToCheckout({ sessionId: data.sessionId });
+                await stripe.redirectToCheckout({ sessionId: data.id });
             } else {
-                console.error("No Session ID returned from Java backend.");
+                console.error("No Session ID returned. Payload:", data);
+                alert("Payment Protocol Error: Invalid Session ID");
             }
+
         } catch (error) {
             console.error("Payment Protocol Failed:", error);
-            alert("Payment Gateway Offline. Check Java Backend Logs.");
+            alert(`Payment Gateway Error: ${error.message}`);
         } finally {
             setLoading(false);
         }
