@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Terminal, Cpu } from 'lucide-react';
+import { Send, Cpu } from 'lucide-react';
 
 const AIChatBox = () => {
     const [messages, setMessages] = useState([{ role: 'ai', content: "Systems online. Awaiting command..." }]);
@@ -13,28 +13,36 @@ const AIChatBox = () => {
     }, [messages, isTyping]);
 
     const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMsg = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMsg]);
-    setInput('');
-    setIsTyping(true);
-
-    try {
-        // Corrected syntax and Railway dynamic URL
-        const response = await fetch(`${process.env.REACT_APP_AI_BACKEND_URL}/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: input })
-        });
+        if (!input.trim()) return;
         
-        const data = await response.json();
-        setMessages(prev => [...prev, { role: 'ai', content: data.reply }]);
-    } catch (error) {
-        setMessages(prev => [...prev, { role: 'ai', content: "Secure link interrupted. Check uplink." }]);
-    } finally {
-        setIsTyping(false);
-    }
-};
+        const userMsg = { role: 'user', content: input };
+        setMessages(prev => [...prev, userMsg]);
+        setInput('');
+        setIsTyping(true);
+
+        // PRODUCTION FIX: Strip trailing slashes to prevent //chat errors
+        const rawUrl = process.env.REACT_APP_AI_BACKEND_URL || "";
+        const aiUrl = rawUrl.replace(/\/$/, "");
+
+        try {
+            // Corrected syntax using the dynamic backend URL
+            const response = await fetch(`${aiUrl}/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input })
+            });
+            
+            if (!response.ok) throw new Error("Secure link interrupted.");
+
+            const data = await response.json();
+            // Match the "reply" key returned by main.py
+            setMessages(prev => [...prev, { role: 'ai', content: data.reply }]);
+        } catch (error) {
+            setMessages(prev => [...prev, { role: 'ai', content: "Secure link interrupted. Check Python uplink." }]);
+        } finally {
+            setIsTyping(false);
+        }
+    };
 
     return (
         <div className="w-full max-w-xl mx-auto bg-[#0c0c0c] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-[500px] md:h-[600px]">
@@ -43,10 +51,6 @@ const AIChatBox = () => {
                 <div className="flex items-center gap-2">
                     <Cpu size={14} className="text-blue-500" />
                     <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">McIntosh AI Engine</span>
-                </div>
-                <div className="flex gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-red-500/50" />
-                    <div className="w-2 h-2 rounded-full bg-blue-500/50" />
                 </div>
             </div>
 
@@ -97,7 +101,7 @@ const AIChatBox = () => {
                     />
                     <button 
                         onClick={sendMessage}
-                        className="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-lg transition-all active:scale-95"
+                        className="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-lg transition-all active:scale-95 shadow-blue-glow"
                     >
                         <Send size={18} />
                     </button>
