@@ -1,4 +1,4 @@
-package com.mcintosh.model;
+package com.mcintosh.mcintosh_digital_biz.model; // <--- FIX THIS PACKAGE
 
 import jakarta.persistence.*;
 import lombok.Data;
