@@ -1,142 +1,167 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Menu, X, Phone, Copy, Check } from 'lucide-react';
+import { Shield, Activity, Menu, X, Cpu, Globe, Lock } from 'lucide-react';
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [backendStatus, setBackendStatus] = useState('connecting'); // connecting, online, offline
 
-  React.useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
-  }, [isOpen]);
+    // Handle scroll effects for the executive glassmorphism look
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
-  const navLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Services', href: '#services' },
-    { name: 'Expertise', href: '#expertise' },
-    { name: 'Protocol', href: '#protocol' }
-  ];
-
-  const handleCopy = (e) => {
-    // Prevent the 'tel:' link from triggering if we are on desktop
-    if (window.innerWidth > 768) {
-      e.preventDefault();
-      navigator.clipboard.writeText('8166483169');
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  return (
-    <>
-      <nav className="fixed w-full z-50 top-0 left-0 border-b border-white/5 bg-[#020617]/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-          
-          {/* Logo Section */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 z-50 relative"
-          >
-            <img src="/mcintosh-logo.png" alt="McIntosh Logo" className="h-10 w-auto object-contain brightness-110" />
-            <div className="text-xl md:text-2xl font-['Playfair_Display'] font-bold text-white tracking-tight hidden sm:block">
-              MCINTOSH
-            </div>
-            <div className="flex items-center gap-1 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full ml-2">
-              <CheckCircle2 className="w-3 h-3 text-blue-400" />
-              <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wider">Verified</span>
-            </div>
-          </motion.div>
-
-          {/* Desktop Navigation & Contact */}
-          <div className="hidden md:flex items-center gap-8">
-            <div className="flex items-center gap-8 border-r border-white/10 pr-8">
-              {navLinks.map((link) => (
-                <a 
-                  key={link.name} href={link.href}
-                  className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors relative group"
-                >
-                  {link.name}
-                  <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-blue-500 transition-all group-hover:w-full"></span>
-                </a>
-              ))}
-            </div>
+    // Handshake logic to verify Python AI Backend integrity
+    useEffect(() => {
+        const checkUplink = async () => {
+            const rawUrl = process.env.REACT_APP_AI_BACKEND_URL || "";
+            const aiUrl = rawUrl.replace(/\/$/, ""); // URL Sanitization
             
-            {/* --- EXECUTIVE PHONE LINE WITH CLICK-TO-COPY --- */}
-            <div className="relative">
-              <motion.a 
-                href="tel:8166483169"
-                onClick={handleCopy}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-3 px-4 py-2 bg-blue-500/5 border border-blue-500/20 rounded-xl group transition-all cursor-pointer overflow-hidden relative"
-              >
-                <div className="relative z-10">
-                  <Phone size={14} className={`transition-colors ${copied ? 'text-green-400' : 'text-blue-400 group-hover:text-white'}`} />
-                  {!copied && (
-                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-ping opacity-75"></span>
-                  )}
-                </div>
+            try {
+                const response = await fetch(`${aiUrl}/`);
+                if (response.ok) {
+                    setBackendStatus('online'); // Sets green status if Python main.py responds
+                } else {
+                    setBackendStatus('offline');
+                }
+            } catch (error) {
+                console.error("Uplink Handshake Failed:", error);
+                setBackendStatus('offline');
+            }
+        };
+        checkUplink();
+    }, []);
+
+    const navLinks = [
+        { name: 'Intelligence', href: '#intelligence', icon: <Cpu size={14} /> },
+        { name: 'Expertise', href: '#expertise', icon: <Shield size={14} /> },
+        { name: 'Protocol', href: '#protocol', icon: <Lock size={14} /> }
+    ];
+
+    return (
+        <nav 
+            className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 border-b ${
+                scrolled 
+                ? 'bg-[#020617]/90 backdrop-blur-xl py-3 border-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]' 
+                : 'bg-transparent py-5 border-transparent'
+            }`}
+        >
+            <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                 
-                <span className={`text-xs font-mono font-bold transition-colors z-10 ${copied ? 'text-green-400' : 'text-slate-200 group-hover:text-blue-400'}`}>
-                  {copied ? "COPIED TO CLIPBOARD" : "(816) 648-3169"}
-                </span>
+                {/* Executive Brand Identity */}
+                <div className="flex items-center gap-4">
+                    <motion.div 
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.8, type: "spring" }}
+                        className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.1)]"
+                    >
+                        <Shield className="text-blue-500" size={26} />
+                    </motion.div>
+                    
+                    <div className="flex flex-col text-left">
+                        <span className="text-white font-black tracking-tighter text-2xl uppercase leading-none">
+                            McIntosh <span className="text-blue-500">Digital</span>
+                        </span>
+                        
+                        {/* Status Badge: Handshake Verification */}
+                        <div className="flex items-center gap-2 mt-1.5">
+                            <span className="text-[7px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold">System Status:</span>
+                            <div className="flex items-center gap-1.5 bg-black/60 px-2 py-0.5 rounded-full border border-white/10">
+                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                    backendStatus === 'online' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse' : 
+                                    backendStatus === 'connecting' ? 'bg-amber-500 animate-pulse' : 
+                                    'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                                }`} />
+                                <span className="text-[7px] text-slate-300 font-black uppercase tracking-[0.2em]">
+                                    {backendStatus === 'online' ? 'Verified Connection' : 
+                                     backendStatus === 'connecting' ? 'Establishing Uplink' : 
+                                     'Link Interrupted'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                {/* Subtle background slide on hover */}
-                <div className="absolute inset-0 bg-blue-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-              </motion.a>
+                {/* Desktop Navigation - Full Feature Set */}
+                <div className="hidden lg:flex items-center gap-8">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/5 backdrop-blur-sm">
+                        {navLinks.map((link) => (
+                            <a 
+                                key={link.name} 
+                                href={link.href}
+                                className="group flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white hover:bg-white/5 transition-all duration-300"
+                            >
+                                <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500">
+                                    {link.icon}
+                                </span>
+                                {link.name}
+                            </a>
+                        ))}
+                    </div>
+                    
+                    <motion.button 
+                        whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59,130,246,0.3)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="bg-white text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl"
+                    >
+                        Secure Line
+                    </motion.button>
+                </div>
 
-              {/* TOOLTIP HINT */}
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                <span className="text-[8px] text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">
-                  Click to copy secure line
-                </span>
-              </div>
+                {/* Mobile Menu Toggle */}
+                <div className="flex lg:hidden items-center gap-4">
+                    <div className={`w-2 h-2 rounded-full ${backendStatus === 'online' ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+                    <button 
+                        className="p-2 text-slate-400 hover:text-white bg-white/5 rounded-lg border border-white/10"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    >
+                        {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                </div>
             </div>
-          </div>
 
-          {/* Mobile Menu Toggle */}
-          <button 
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden z-50 p-2 text-white hover:bg-white/10 rounded-full transition-colors"
-          >
-            {isOpen ? <X /> : <Menu />}
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-[#020617]/95 backdrop-blur-2xl flex flex-col items-center justify-center space-y-8 md:hidden"
-          >
-            {navLinks.map((link, i) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="text-2xl font-['Playfair_Display'] font-bold text-white uppercase tracking-widest hover:text-blue-500 transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
-            
-            <a 
-              href="tel:8166483169"
-              className="mt-8 flex items-center gap-3 px-8 py-4 bg-blue-600 rounded-2xl text-white font-black text-sm uppercase tracking-widest shadow-blue-glow"
-            >
-              <Phone size={18} /> (816) 648-3169
-            </a>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
+            {/* Mobile Navigation Drawer */}
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="lg:hidden absolute top-full left-0 w-full bg-[#020617]/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl"
+                    >
+                        <div className="flex flex-col p-8 gap-6">
+                            {navLinks.map((link, i) => (
+                                <motion.a 
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    key={link.name} 
+                                    href={link.href}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="flex items-center gap-4 text-sm font-black text-slate-400 uppercase tracking-[0.4em] hover:text-blue-500 transition-colors"
+                                >
+                                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                                        {link.icon}
+                                    </div>
+                                    {link.name}
+                                </motion.a>
+                            ))}
+                            <hr className="border-white/5" />
+                            <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs shadow-[0_10px_20px_-5px_rgba(59,130,246,0.5)]">
+                                Initiate Secure Line
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </nav>
+    );
 };
 
 export default Navbar;
