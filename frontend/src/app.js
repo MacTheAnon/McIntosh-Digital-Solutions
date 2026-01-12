@@ -1,166 +1,268 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'; // "Damn he used React" animations
+import { Shield, Cpu, Activity, Send, CheckCircle2, Terminal } from 'lucide-react'; // Clean icons
 
-// --- SVGs for Icons (Makes it look pro without installing libraries) ---
-const ChartIcon = () => (
-  <svg className="w-12 h-12 text-amber-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" /></svg>
+// --- SUB-COMPONENTS (The "React Way") ---
+
+const VerifiedBadge = () => (
+  <motion.div 
+    initial={{ scale: 0 }}
+    animate={{ scale: 1 }}
+    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+    className="inline-flex items-center gap-1 bg-blue-500/10 border border-blue-500/50 px-2 py-0.5 rounded-full ml-2"
+  >
+    <CheckCircle2 className="w-3 h-3 text-blue-400" />
+    <span className="text-[10px] font-bold tracking-wider text-blue-400 uppercase">Verified</span>
+  </motion.div>
 );
-const ShieldIcon = () => (
-  <svg className="w-12 h-12 text-amber-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-);
-const ChipIcon = () => (
-  <svg className="w-12 h-12 text-amber-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+
+const ServiceCard = ({ icon: Icon, title, desc, delay }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay, duration: 0.5 }}
+    whileHover={{ y: -5, boxShadow: "0 20px 40px -15px rgba(0, 242, 255, 0.1)" }}
+    className="p-8 rounded-2xl bg-slate-900/50 border border-slate-800 backdrop-blur-sm group hover:border-blue-500/30 transition-all duration-300"
+  >
+    <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+      <Icon className="w-6 h-6 text-blue-400 group-hover:text-cyan-300" />
+    </div>
+    <h3 className="text-xl font-bold text-white mb-3 font-['Playfair_Display']">{title}</h3>
+    <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
+  </motion.div>
 );
 
 function App() {
-  const [chatMessage, setChatMessage] = useState("");
+  // State for the "Real" terminal experience
+  const [input, setInput] = useState("");
+  const [history, setHistory] = useState([
+    { type: 'system', content: 'Initializing McIntosh_Secure_Link v4.2...' },
+    { type: 'system', content: 'Connection established. Encryption: AES-256.' },
+    { type: 'ai', content: 'Welcome, Administrator. How can I optimize your workflow today?' }
+  ]);
+  const [isTyping, setIsTyping] = useState(false);
+  const chatEndRef = useRef(null);
+
+  // Auto-scroll terminal
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [history]);
+
+  const handleCommand = (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    // Add user message
+    const newHistory = [...history, { type: 'user', content: input }];
+    setHistory(newHistory);
+    setInput("");
+    setIsTyping(true);
+
+    // Simulate "AI" processing
+    setTimeout(() => {
+      setHistory(prev => [...prev, { 
+        type: 'ai', 
+        content: `Analyzing request: "${input}"... \n>> Optimization protocols initiated. System integrity at 100%.` 
+      }]);
+      setIsTyping(false);
+    }, 1500);
+  };
 
   return (
-    // FONT: 'Playfair Display' for Headings, 'Lato' for text
-    <div className="min-h-screen bg-slate-50 font-['Lato'] text-slate-800">
+    <div className="min-h-screen bg-[#020617] text-slate-200 selection:bg-blue-500/30 font-['Lato'] overflow-x-hidden">
       
-      {/* 1. NAVBAR - Glass Effect */}
-      <nav className="fixed w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-700">
+      {/* 1. NAVBAR - High-End Blur */}
+      <nav className="fixed w-full z-50 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-          <div className="text-2xl font-['Playfair_Display'] font-bold text-white tracking-wider">
-            MCINTOSH <span className="text-amber-500">DIGITAL</span>
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center cursor-pointer"
+          >
+            <div className="text-2xl font-['Playfair_Display'] font-bold text-white tracking-tight">
+              MCINTOSH
+            </div>
+            <VerifiedBadge />
+          </motion.div>
+
+          <div className="hidden md:flex space-x-8 text-xs font-bold tracking-[0.2em] uppercase text-slate-400">
+            {['Services', 'Protocol', 'Contact'].map((item) => (
+              <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-blue-400 transition-colors duration-300 relative group">
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-400 transition-all group-hover:w-full"></span>
+              </a>
+            ))}
           </div>
-          <div className="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase text-slate-300">
-            <a href="#services" className="hover:text-amber-500 transition-colors duration-300">Services</a>
-            <a href="#expertise" className="hover:text-amber-500 transition-colors duration-300">Expertise</a>
-            <a href="#contact" className="hover:text-amber-500 transition-colors duration-300">Contact</a>
-          </div>
-          <button className="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold uppercase tracking-widest rounded transition-all">
-            Client Portal
+          
+          <button className="px-6 py-2 bg-white text-slate-950 text-xs font-bold uppercase tracking-widest rounded hover:bg-blue-50 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            Client Login
           </button>
         </div>
       </nav>
 
-      {/* 2. HERO SECTION - The "Wix" Look (Big Image + Overlay) */}
-      <header className="relative h-[85vh] flex items-center justify-center bg-slate-900 overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80" 
-            alt="Corporate Office" 
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 to-slate-900/40"></div>
-        </div>
+      {/* 2. HERO SECTION - Animated & Gradient */}
+      <header className="relative min-h-screen flex items-center justify-center pt-20">
+        {/* Abstract Background Glows */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-[128px] pointer-events-none" />
 
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-16">
-          <p className="text-amber-500 font-bold tracking-[0.3em] uppercase text-sm mb-4 animate-fade-in-up">
-            Premium Digital Solutions
-          </p>
-          <h1 className="text-5xl md:text-7xl font-['Playfair_Display'] font-bold text-white leading-tight mb-8">
-            Architecting the <br/> Future of Business
-          </h1>
-          <p className="text-xl text-slate-300 mb-10 font-light max-w-2xl mx-auto">
-            Leveraging advanced AI and secure Java infrastructure to build enterprise-grade systems for the modern executive.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button className="px-10 py-4 bg-white text-slate-900 font-bold uppercase tracking-widest hover:bg-slate-200 transition shadow-xl">
-              Our Services
-            </button>
-            <button className="px-10 py-4 border border-white/30 text-white font-bold uppercase tracking-widest hover:bg-white/10 transition backdrop-blur-sm">
-              Contact Us
-            </button>
-          </div>
+        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <span className="inline-block py-1 px-3 rounded-full bg-slate-800/50 border border-slate-700 text-blue-400 text-xs font-bold tracking-widest uppercase mb-8 backdrop-blur-md">
+              System Online • v2.4.0
+            </span>
+            
+            <h1 className="text-6xl md:text-8xl font-['Playfair_Display'] font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-500 mb-8 leading-tight">
+              Digital Perfection <br/>
+              <span className="italic font-light text-slate-400">Verified.</span>
+            </h1>
+            
+            <p className="text-lg text-slate-400 mb-10 font-light max-w-2xl mx-auto leading-relaxed">
+              We don't just build software. We engineer <span className="text-white font-medium">status symbols</span> for the digital age. 
+              Powered by advanced neural networks and military-grade encryption.
+            </p>
+
+            <div className="flex gap-4 justify-center">
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-blue-600 text-white font-bold uppercase tracking-widest rounded-lg shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] hover:bg-blue-500 transition-all"
+              >
+                Initiate
+              </motion.button>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 border border-slate-700 text-slate-300 font-bold uppercase tracking-widest rounded-lg hover:bg-slate-800 hover:text-white transition-all"
+              >
+                Documentation
+              </motion.button>
+            </div>
+          </motion.div>
         </div>
       </header>
 
-      {/* 3. FEATURES GRID - Clean, Professional Cards */}
-      <section id="services" className="py-24 bg-white">
+      {/* 3. FEATURE CARDS - Glass & Hover Effects */}
+      <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-['Playfair_Display'] font-bold text-slate-900 mb-4">Executive Capabilities</h2>
-            <div className="h-1 w-20 bg-amber-500 mx-auto"></div>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-10">
-            {/* Card 1 */}
-            <div className="p-10 bg-slate-50 border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
-              <ChipIcon />
-              <h3 className="text-2xl font-['Playfair_Display'] font-bold mb-4 group-hover:text-amber-600 transition-colors">AI Architecture</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Deploying Python-based neural networks to automate complex decision-making processes for your enterprise.
-              </p>
-            </div>
-
-            {/* Card 2 */}
-            <div className="p-10 bg-slate-50 border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
-              <ShieldIcon />
-              <h3 className="text-2xl font-['Playfair_Display'] font-bold mb-4 group-hover:text-amber-600 transition-colors">Java Security</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Bank-grade backend infrastructure powered by Spring Boot, ensuring your data remains impenetrable.
-              </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="p-10 bg-slate-50 border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
-              <ChartIcon />
-              <h3 className="text-2xl font-['Playfair_Display'] font-bold mb-4 group-hover:text-amber-600 transition-colors">Scalable Growth</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Systems designed to scale effortlessly with your business, handling millions of requests with zero latency.
-              </p>
-            </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <ServiceCard 
+              icon={Cpu}
+              title="Neural Architecture" 
+              desc="Python-driven AI models that adapt to your business logic in real-time."
+              delay={0.1}
+            />
+            <ServiceCard 
+              icon={Shield}
+              title="Fortress Security" 
+              desc="Java Spring Boot infrastructure featuring bank-grade encryption protocols."
+              delay={0.2}
+            />
+            <ServiceCard 
+              icon={Activity}
+              title="Hyper-Scaling" 
+              desc="Elastic containerization ensuring 99.99% uptime during traffic spikes."
+              delay={0.3}
+            />
           </div>
         </div>
       </section>
 
-      {/* 4. AI DEMO SECTION - Dark Tech Contrast */}
-      <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
+      {/* 4. INTERACTIVE TERMINAL - "React" Logic */}
+      <section className="py-24 bg-gradient-to-b from-[#020617] to-slate-900 border-t border-slate-800">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row gap-12 items-center">
+          
           <div className="md:w-1/2">
-            <p className="text-amber-500 font-bold tracking-widest uppercase mb-2">Live Demonstration</p>
-            <h2 className="text-4xl font-['Playfair_Display'] font-bold mb-6">Experience the Intelligence</h2>
-            <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-              Interact directly with our Python-powered backend. This terminal connects securely to our OpenAI integration to demonstrate real-time processing capabilities.
+            <h2 className="text-4xl font-['Playfair_Display'] font-bold text-white mb-6">
+              Talk to the <span className="text-blue-500">Mainframe</span>
+            </h2>
+            <p className="text-slate-400 text-lg mb-8">
+              Experience our proprietary backend directly from the browser. 
+              This interface communicates with our AI engine to demonstrate latency-free processing.
             </p>
             
-            <div className="flex gap-4 text-sm font-bold text-slate-500">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> SYSTEM ONLINE
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
+                <div className="text-2xl font-bold text-white">98ms</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider">Latency</div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span> ENCRYPTED
+              <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
+                <div className="text-2xl font-bold text-green-400">Secure</div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider">Status</div>
               </div>
             </div>
           </div>
 
-          {/* The Chat Interface (Styled like a Terminal) */}
+          {/* The "Damn he used React" Terminal Component */}
           <div className="md:w-1/2 w-full">
-            <div className="bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700">
-              <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              </div>
-              <div className="p-6 h-64 overflow-y-auto font-mono text-sm space-y-4">
-                <div className="text-slate-500">Initializing connection... Connected to McIntosh_AI_v1.0</div>
-                <div className="bg-slate-700/50 p-3 rounded-lg rounded-tl-none inline-block max-w-[80%]">
-                  <span className="text-amber-400 block text-xs mb-1">System</span>
-                  Welcome. How may I assist with your executive tasks?
-                </div>
-              </div>
-              <div className="p-4 bg-slate-800 border-t border-slate-700">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="rounded-xl overflow-hidden bg-[#0c0c0c] border border-slate-800 shadow-2xl"
+            >
+              {/* Terminal Header */}
+              <div className="bg-[#1a1a1a] px-4 py-3 border-b border-slate-800 flex justify-between items-center">
                 <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition font-mono text-sm"
-                    placeholder="Enter command..."
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
-                  />
-                  <button className="bg-amber-600 hover:bg-amber-700 px-6 rounded font-bold text-sm uppercase tracking-wide transition">
-                    Run
-                  </button>
+                  <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                </div>
+                <div className="text-xs font-mono text-slate-500 flex items-center gap-2">
+                  <Terminal size={12} /> root@mcintosh-ai:~
                 </div>
               </div>
-            </div>
+
+              {/* Terminal Body */}
+              <div className="p-4 h-80 overflow-y-auto font-mono text-sm custom-scrollbar bg-black/50">
+                <AnimatePresence>
+                  {history.map((msg, idx) => (
+                    <motion.div 
+                      key={idx}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className={`mb-3 ${msg.type === 'ai' ? 'text-blue-400' : msg.type === 'system' ? 'text-slate-500 italic' : 'text-green-400'}`}
+                    >
+                      <span className="opacity-50 mr-2">{msg.type === 'user' ? '>' : '#'}</span>
+                      {msg.content}
+                    </motion.div>
+                  ))}
+                  {isTyping && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-blue-400">
+                      <span className="opacity-50 mr-2">#</span>
+                      <span className="animate-pulse">_</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div ref={chatEndRef} />
+              </div>
+
+              {/* Terminal Input */}
+              <form onSubmit={handleCommand} className="p-3 bg-[#1a1a1a] border-t border-slate-800 flex gap-3">
+                <span className="text-green-400 font-mono py-2">{'>'}</span>
+                <input 
+                  type="text" 
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  className="flex-1 bg-transparent border-none focus:ring-0 text-white font-mono text-sm placeholder-slate-600"
+                  placeholder="Execute command..."
+                  autoFocus
+                />
+                <button type="submit" disabled={!input} className="p-2 bg-blue-600 rounded hover:bg-blue-500 disabled:opacity-50 transition-colors">
+                  <Send size={16} className="text-white" />
+                </button>
+              </form>
+            </motion.div>
           </div>
+
         </div>
       </section>
-
     </div>
   );
 }

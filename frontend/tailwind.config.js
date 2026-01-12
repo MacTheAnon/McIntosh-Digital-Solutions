@@ -1,16 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
-      colors: {
-        'brand-blue': '#2563eb', // Matches your ThreatMonitor progress bar
-      },
+      screens: { 'xs': '375px' }, // Mobile optimization
       animation: {
-        'progress': 'progress 2s ease-in-out infinite',
-      }
+        'scan': 'scan 3s linear infinite',
+        'shimmer': 'shimmer 2s infinite',
+      },
+      keyframes: {
+        scan: {
+          '0%': { top: '0%', opacity: '0' },
+          '50%': { opacity: '1' },
+          '100%': { top: '100%', opacity: '0' },
+        },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
     },
   },
   plugins: [],
