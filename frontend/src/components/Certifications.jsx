@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, ShieldCheck, Layout, X, Zap, ShieldAlert, Cpu } from 'lucide-react';
+import { ShieldCheck, Layout, X, Zap, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Certifications = () => {
@@ -42,7 +42,8 @@ const Certifications = () => {
 
     return (
         <div className="w-full py-6">
-            <div className="grid grid-cols-2 md:flex md:flex-row justify-center items-center gap-4 md:gap-6">
+            {/* Main Grid View */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row justify-center items-center gap-4 md:gap-6">
                 {certs.map((cert, i) => (
                     <motion.div 
                         key={i}
@@ -52,6 +53,7 @@ const Certifications = () => {
                         className="flex flex-col p-4 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-xl relative group overflow-hidden"
                     >
                         <div className="flex items-center gap-3">
+                            {/* Icon Container */}
                             <div className="flex-shrink-0 p-2 bg-black/40 rounded-lg border border-slate-700/50">
                                 {cert.isImg ? (
                                     <img src={cert.icon} alt={cert.name} className="h-5 w-auto filter brightness-200" />
@@ -59,12 +61,15 @@ const Certifications = () => {
                                     <div className="text-blue-400">{cert.icon}</div>
                                 )}
                             </div>
+
+                            {/* Label Content - Duplicate Removed */}
                             <div className="flex flex-col text-left">
                                 <span className="text-[10px] font-black text-white uppercase tracking-tight whitespace-nowrap">
-  {cert.name}
-</span>
-                                <span className="text-[10px] font-black text-white uppercase">{cert.name}</span>
-                                <span className="text-[8px] text-blue-500 font-mono font-bold uppercase">{cert.label}</span>
+                                    {cert.name}
+                                </span>
+                                <span className="text-[8px] text-blue-500 font-mono font-bold uppercase tracking-widest">
+                                    {cert.label}
+                                </span>
                             </div>
                         </div>
                     </motion.div>
@@ -75,6 +80,7 @@ const Certifications = () => {
             <AnimatePresence>
                 {selectedCert && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        {/* Backdrop */}
                         <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -83,6 +89,7 @@ const Certifications = () => {
                             className="absolute inset-0 bg-black/80 backdrop-blur-md"
                         />
                         
+                        {/* Modal Content */}
                         <motion.div 
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -90,7 +97,7 @@ const Certifications = () => {
                             className="relative w-full max-w-lg bg-[#0c0c0c] border border-blue-500/30 p-8 rounded-[2.5rem] shadow-[0_0_50px_rgba(59,130,246,0.15)] overflow-hidden"
                         >
                             {/* Decorative Scan Line */}
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-scan" />
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" />
 
                             <div className="flex justify-between items-start mb-8">
                                 <div>
@@ -113,16 +120,16 @@ const Certifications = () => {
                                         ))}
                                     </ul>
                                 </div>
-                                <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-3xl flex flex-col items-center justify-center">
+                                <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-3xl flex flex-col items-center justify-center text-center">
                                     <ShieldAlert className="text-blue-500 mb-2" size={32} />
                                     <p className="text-[10px] text-blue-400 font-black uppercase tracking-tighter">{selectedCert.clearance}</p>
-                                    <p className="text-[8px] text-blue-500/50 font-mono mt-1 italic">Authorized Personnel Only</p>
+                                    <p className="text-[8px] text-blue-500/50 font-mono mt-1 italic whitespace-nowrap">Authorized Personnel Only</p>
                                 </div>
                             </div>
 
                             <button 
                                 onClick={() => setSelectedCert(null)}
-                                className="w-full py-4 bg-white text-black font-black text-[10px] uppercase tracking-[0.3em] rounded-xl hover:bg-blue-50 transition-all"
+                                className="w-full py-4 bg-white text-black font-black text-[10px] uppercase tracking-[0.3em] rounded-xl hover:bg-blue-50 transition-all active:scale-[0.98]"
                             >
                                 Close Secure Terminal
                             </button>
