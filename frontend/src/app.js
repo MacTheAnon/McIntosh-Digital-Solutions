@@ -385,7 +385,7 @@ function App() {
           © 2026 McIntosh Digital Solutions
         </p>
         <p className="text-slate-800 text-[9px] uppercase tracking-[0.2em] font-mono">
-          Handcrafted in React • Deployed via Railway Edge
+          Handcrafted By Kaleb McIntosh
         </p>
       </footer>
 
