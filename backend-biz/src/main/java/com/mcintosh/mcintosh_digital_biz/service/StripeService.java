@@ -3,24 +3,38 @@ package com.mcintosh.mcintosh_digital_biz.service;
 import com.stripe.Stripe;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import jakarta.annotation.PostConstruct; // <--- CRITICAL FIX FOR SPRING BOOT 3
 
 @Service
 public class StripeService {
 
-    @Value("${stripe.api.key}")
-    private String apiKey;
+    private static final Logger logger = LoggerFactory.getLogger(StripeService.class);
 
-    // Initialize Stripe API Key on startup
+    // Fail-safe: Defaults to empty string if variable is missing
+    @Value("${STRIPE_SECRET_KEY:}")
+    private String stripeSecretKey;
+
     @PostConstruct
     public void init() {
-        Stripe.apiKey = apiKey;
+        if (stripeSecretKey == null || stripeSecretKey.isEmpty()) {
+            logger.error("SYSTEM CRITICAL: Stripe Secret Key is missing from Environment Variables.");
+            logger.warn("Payment modules will remain in STANDBY mode.");
+        } else {
+            Stripe.apiKey = stripeSecretKey;
+            logger.info("STRIPE PROTOCOL: Initialized successfully.");
+        }
     }
 
     public Session createCheckoutSession(String clientEmail) throws Exception {
-        // Use localhost for testing so the redirect works on your machine
+        // Ensure the key is set before attempting to call Stripe
+        if (Stripe.apiKey == null || Stripe.apiKey.isEmpty()) {
+            throw new IllegalStateException("Stripe API Key is not configured. Protocol aborted.");
+        }
+
         String baseUrl = "https://mcintosh-digital-solutions.up.railway.app"; 
 
         SessionCreateParams params = SessionCreateParams.builder()
@@ -28,19 +42,30 @@ public class StripeService {
             .setSuccessUrl(baseUrl + "/success")
             .setCancelUrl(baseUrl + "/")
             .setCustomerEmail(clientEmail)
-            .addLineItem(SessionCreateParams.LineItem.builder()
-                .setQuantity(1L)
-                .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
-                    .setCurrency("usd")
-                    .setUnitAmount(10000L) // $100.00
-                    .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                        .setName("Project Deposit - McIntosh Digital Solutions")
-                        .setDescription("Secure initiation fee for development services.")
-                        .build())
-                    .build())
-                .build())
+            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD) // Updated for SDK v24+
+            .addLineItem(
+                SessionCreateParams.LineItem.builder()
+                    .setQuantity(1L)
+                    .setPriceData(
+                        SessionCreateParams.LineItem.PriceData.builder()
+                            .setCurrency("usd")
+                            .setUnitAmount(10000L) // $100.00
+                            .setProductData(
+                                SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                    .setName("Project Deposit - McIntosh Digital Solutions")
+                                    .setDescription("Secure initiation fee for development services.")
+                                    .build()
+                            )
+                            .build()
+                    )
+                    .build()
+            )
             .build();
 
         return Session.create(params);
+    }
+
+    public String getApiKey() {
+        return stripeSecretKey;
     }
 }

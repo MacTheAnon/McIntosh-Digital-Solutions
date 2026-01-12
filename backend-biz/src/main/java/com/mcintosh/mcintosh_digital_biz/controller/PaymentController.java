@@ -1,9 +1,8 @@
 package com.mcintosh.mcintosh_digital_biz.controller;
 
-import com.stripe.Stripe;
+import com.mcintosh.mcintosh_digital_biz.service.StripeService;
 import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -11,53 +10,42 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*") 
+@CrossOrigin(origins = "*") // Allows your frontend to communicate with this API
 public class PaymentController {
 
-    @Value("${STRIPE_SECRET_KEY}")
-    private String stripeSecretKey;
+    @Autowired
+    private StripeService stripeService;
 
+    /**
+     * Endpoint to initiate the Secure Payment Protocol
+     * Receives a request from React and returns a Stripe Session ID
+     */
     @PostMapping("/create-session")
-    public Map<String, String> createCheckoutSession() {
-        Stripe.apiKey = stripeSecretKey;
-        Map<String, String> responseData = new HashMap<>();
-
+    public Map<String, String> createSession(@RequestBody Map<String, String> request) {
+        Map<String, String> response = new HashMap<>();
+        
         try {
-            SessionCreateParams params = SessionCreateParams.builder()
-                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("https://mcintosh-digital-solutions.up.railway.app/?success=true")
-                .setCancelUrl("https://mcintosh-digital-solutions.up.railway.app/?canceled=true")
-                .addLineItem(
-                    SessionCreateParams.LineItem.builder()
-                        .setQuantity(1L)
-                        .setPriceData(
-                            SessionCreateParams.LineItem.PriceData.builder()
-                                .setCurrency("usd")
-                                .setUnitAmount(5000L) // $50.00
-                                .setProductData(
-                                    SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                        .setName("System Architecture Consultation")
-                                        .build()
-                                )
-                                .build()
-                        )
-                        .build()
-                )
-                .build();
+            // Extracts the client email sent from your BookingForm.jsx
+            String email = request.get("email");
+            if (email == null || email.isEmpty()) {
+                email = "client@mcintosh-digital.com"; // Fallback for testing
+            }
 
-            Session session = Session.create(params);
-            responseData.put("id", session.getId());
-            return responseData;
+            // Calls the Service logic we just built
+            Session session = stripeService.createCheckoutSession(email);
+            
+            // Returns the session ID back to the frontend
+            response.put("id", session.getId());
+            return response;
 
         } catch (Exception e) {
-            responseData.put("error", e.getMessage());
-            return responseData;
+            response.put("error", e.getMessage());
+            return response;
         }
     }
 
     @GetMapping("/health")
-    public String health() {
+    public String checkIntegrity() {
         return "Backend System Integrity: 100%";
     }
 }
