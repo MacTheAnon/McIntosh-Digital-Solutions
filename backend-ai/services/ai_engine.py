@@ -1,29 +1,35 @@
 import os
 from openai import OpenAI
 
-# Initialize client using Railway Environment Variables
-# Ensure OPENAI_API_KEY is set in your Railway dashboard
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 def get_ai_response(user_message_str):
     """
-    Accepts raw string, wraps it in OpenAI format, and prepends system prompt.
+    Safely connects to OpenAI and handles missing keys or connection errors
+    without crashing the entire server.
     """
-    system_prompt = {
-        "role": "system", 
-        "content": "You are the AI assistant for McIntosh Digital Solutions. You are a cybersecurity expert. Keep answers concise and professional. Creator: Kaleb McIntosh."
-    }
-    
-    # Wrap input into OpenAI dictionary format
-    user_message = {"role": "user", "content": user_message_str}
-    messages = [system_prompt, user_message]
-    
+    # 1. Security Check: Ensure Key Exists
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return "SYSTEM ERROR: OpenAI API Key is missing. Check Railway Variables."
+
     try:
+        # 2. Initialize Client Locally (Prevents global startup crashes)
+        client = OpenAI(api_key=api_key)
+
+        system_prompt = {
+            "role": "system", 
+            "content": "You are the AI assistant for McIntosh Digital Solutions. You are a cybersecurity expert. Keep answers concise and professional. Creator: Kaleb McIntosh."
+        }
+        
+        user_message = {"role": "user", "content": user_message_str}
+        
+        # 3. Execute Request
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=messages,
+            messages=[system_prompt, user_message],
             temperature=0.7
         )
         return response.choices[0].message.content
+
     except Exception as e:
+        # 4. Return Error as Text (So Frontend displays it instead of crashing)
         return f"AI UPLINK ERROR: {str(e)}"
