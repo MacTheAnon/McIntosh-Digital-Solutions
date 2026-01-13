@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = "*") 
+// @CrossOrigin removed to allow WebConfig to handle security globally
 public class BookingController {
 
     @Autowired
@@ -24,7 +24,7 @@ public class BookingController {
             
             Map<String, String> response = new HashMap<>();
             response.put("sessionId", session.getId());
-            response.put("url", session.getUrl()); // This is the modern redirect path
+            response.put("url", session.getUrl());
             
             return ResponseEntity.ok(response);
             
