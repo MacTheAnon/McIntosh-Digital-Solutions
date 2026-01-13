@@ -15,17 +15,20 @@ def get_ai_response(user_message_str):
         # 2. Initialize Client Locally (Prevents global startup crashes)
         client = OpenAI(api_key=api_key)
 
-        system_prompt = {
-            "role": "system", 
-            "content": "You are the AI assistant for McIntosh Digital Solutions. You are a cybersecurity expert. Keep answers concise and professional. Creator: Kaleb McIntosh."
-        }
-        
-        user_message = {"role": "user", "content": user_message_str}
-        
         # 3. Execute Request
+        # Fix: Define messages inline so Pylance recognizes the specific 'role' types
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[system_prompt, user_message],
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are the AI assistant for McIntosh Digital Solutions. You are a cybersecurity expert. Keep answers concise and professional. Creator: Kaleb McIntosh."
+                },
+                {
+                    "role": "user", 
+                    "content": user_message_str
+                }
+            ],
             temperature=0.7
         )
         return response.choices[0].message.content
