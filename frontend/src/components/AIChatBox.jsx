@@ -8,8 +8,12 @@ const AIChatBox = () => {
     const [isTyping, setIsTyping] = useState(false);
     const scrollRef = useRef(null);
 
+    // FIX: Only scroll to bottom if the chat history actually grows (user/AI types)
+    // This prevents it from jerking the screen on initial load if not needed.
     useEffect(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (messages.length > 1 || isTyping) {
+            scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
     }, [messages, isTyping]);
 
     const sendMessage = async () => {
@@ -98,6 +102,7 @@ const AIChatBox = () => {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                         placeholder="Enter command..."
+                        // REMOVED autoFocus explicitly to be safe
                     />
                     <button 
                         onClick={sendMessage}

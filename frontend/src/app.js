@@ -9,8 +9,12 @@ import ThreatMonitor from './components/ThreatMonitor';
 import Certifications from './components/Certifications';
 import SuccessPage from './components/SuccessPage';
 import AIChatBox from './components/AIChatBox';
-import CyberGame from './components/CyberGame'; // <--- Security Layer Integrated
+import CyberGame from './components/CyberGame';
 import Footer from './components/Footer';
+
+// IMPORTANT: Import the ScrollToTop component here
+// (Make sure the file path matches where you saved it)
+import ScrollToTop from './ScrollToTop'; 
 
 const MainTerminal = () => {
   return (
@@ -95,6 +99,9 @@ const MainTerminal = () => {
 function App() {
   return (
     <Router>
+      {/* ScrollToTop component placed here to reset scroll on route change */}
+      <ScrollToTop />
+      
       <Routes>
         <Route path="/" element={<MainTerminal />} />
         <Route path="/success" element={<SuccessPage />} />
