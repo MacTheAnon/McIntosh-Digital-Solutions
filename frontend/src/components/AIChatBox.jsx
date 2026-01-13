@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Send, Cpu } from 'lucide-react';
 
 const AIChatBox = () => {
@@ -8,8 +8,8 @@ const AIChatBox = () => {
     const [isTyping, setIsTyping] = useState(false);
     const scrollRef = useRef(null);
 
-    // FIX: Only scroll to bottom if the chat history actually grows (user/AI types)
-    // This prevents it from jerking the screen on initial load if not needed.
+    // LOGIC: Only scroll if we have new messages (length > 1) or are actively typing.
+    // This prevents the "Jump to bottom" on initial page load.
     useEffect(() => {
         if (messages.length > 1 || isTyping) {
             scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -24,12 +24,11 @@ const AIChatBox = () => {
         setInput('');
         setIsTyping(true);
 
-        // PRODUCTION FIX: Strip trailing slashes to prevent //chat errors
+        // SAFE URL HANDLING: Removes trailing slash if present
         const rawUrl = process.env.REACT_APP_AI_BACKEND_URL || "";
         const aiUrl = rawUrl.replace(/\/$/, "");
 
         try {
-            // Corrected syntax using the dynamic backend URL
             const response = await fetch(`${aiUrl}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -39,7 +38,6 @@ const AIChatBox = () => {
             if (!response.ok) throw new Error("Secure link interrupted.");
 
             const data = await response.json();
-            // Match the "reply" key returned by main.py
             setMessages(prev => [...prev, { role: 'ai', content: data.reply }]);
         } catch (error) {
             setMessages(prev => [...prev, { role: 'ai', content: "Secure link interrupted. Check Python uplink." }]);
@@ -48,9 +46,16 @@ const AIChatBox = () => {
         }
     };
 
+    // HANDLER: Allows sending with "Enter" key
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    };
+
     return (
         <div className="w-full max-w-xl mx-auto bg-[#0c0c0c] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-[500px] md:h-[600px]">
-            {/* Header - Fixed on Mobile */}
+            {/* Header */}
             <div className="px-4 py-3 bg-slate-900/50 border-b border-slate-800 flex justify-between items-center">
                 <div className="flex items-center gap-2">
                     <Cpu size={14} className="text-blue-500" />
@@ -58,7 +63,7 @@ const AIChatBox = () => {
                 </div>
             </div>
 
-            {/* Chat Area - Optimized for Touch Scrolling */}
+            {/* Chat Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-[radial-gradient(circle_at_top,rgba(30,41,59,0.2),transparent)]">
                 {messages.map((msg, i) => (
                     <motion.div 
@@ -79,6 +84,7 @@ const AIChatBox = () => {
                         </div>
                     </motion.div>
                 ))}
+                
                 {isTyping && (
                     <div className="flex justify-start">
                         <div className="bg-slate-800/50 p-3 rounded-2xl rounded-tl-none border border-slate-700">
@@ -93,16 +99,15 @@ const AIChatBox = () => {
                 <div ref={scrollRef} />
             </div>
 
-            {/* Input - Large Touch Targets */}
+            {/* Input Area */}
             <div className="p-3 bg-slate-900/80 backdrop-blur-md border-t border-slate-800">
                 <div className="flex gap-2 bg-black/40 border border-slate-700 rounded-xl p-1 focus-within:border-blue-500 transition-colors">
                     <input 
                         className="flex-1 bg-transparent text-white px-3 py-3 text-sm focus:outline-none placeholder-slate-600"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                        onKeyDown={handleKeyDown} 
                         placeholder="Enter command..."
-                        // REMOVED autoFocus explicitly to be safe
                     />
                     <button 
                         onClick={sendMessage}
