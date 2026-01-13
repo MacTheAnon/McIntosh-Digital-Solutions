@@ -25,9 +25,9 @@ const CyberGame = () => {
         <div className="w-full max-w-sm mx-auto px-4 sm:px-0">
             {/* Main Container with Desktop Hover Glow */}
             <motion.div 
-                whileHover={{ shadow: "0 0 30px rgba(34, 197, 94, 0.15)" }}
-                className="bg-black border-2 border-green-900/30 rounded-3xl p-6 md:p-8 relative overflow-hidden transition-colors duration-500 hover:border-green-800/50"
-            >
+    whileHover={{ shadow: "0 0 30px rgba(34, 197, 94, 0.15)" }} // Keep hover effect
+    className="bg-black/90 md:bg-black/40 border-2 border-green-900/30 rounded-3xl p-6 md:p-8 relative overflow-hidden transition-colors duration-500 hover:border-green-800/50 backdrop-blur-none md:backdrop-blur-md"
+>
                 {/* Mobile Scanline Effect */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-green-500/10 animate-[scan_4s_linear_infinite] z-0 pointer-events-none" />
 

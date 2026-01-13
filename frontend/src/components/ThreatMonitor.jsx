@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion'; 
 import { ShieldAlert, Activity, Lock, Globe } from 'lucide-react';
 
 const ThreatMonitor = () => {
@@ -33,8 +33,7 @@ const ThreatMonitor = () => {
     }, []);
 
     return (
-        <div className="w-full h-full p-6 md:p-8 bg-slate-900/20 border border-slate-800 rounded-[2.5rem] backdrop-blur-xl relative overflow-hidden group">
-            {/* Background Grid Pattern */}
+    <div className="w-full h-full p-6 md:p-8 bg-slate-900/95 md:bg-slate-900/20 md:backdrop-blur-xl border border-slate-800 rounded-[2.5rem] relative overflow-hidden group">
             <div className="absolute inset-0 opacity-10 pointer-events-none" 
                  style={{ backgroundImage: 'radial-gradient(#3b82f6 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
 

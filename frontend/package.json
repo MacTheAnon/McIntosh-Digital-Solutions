@@ -18,9 +18,9 @@
   },
   "scripts": {
     "dev": "react-scripts start",
-    "start": "serve -s build",
+    "start": "serve -s build -C",  
     "build": "react-scripts build"
-  },
+},
   "engines": {
     "node": "18.x"
   },
