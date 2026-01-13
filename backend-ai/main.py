@@ -66,15 +66,16 @@ def read_root():
 
 @app.post("/chat")
 @limiter.limit("10/minute")
-async def chat_endpoint(request: ChatRequest, req: Request):
+# FIX: 'request' MUST be the standard Request object. We rename the data to 'chat_data'.
+async def chat_endpoint(request: Request, chat_data: ChatRequest):
     try:
-        response = get_ai_response(request.message)
+        # Use the new variable name here
+        response = get_ai_response(chat_data.message)
         return {"reply": response}
     except Exception as e:
         print(f"CRITICAL SYSTEM ERROR: {e}")
-        # Raising this will trigger the global_exception_handler above
+        # Raising this will trigger the global_exception_handler
         raise e
-
 @app.post("/game/attempt")
 async def game_endpoint(request: GameRequest):
     return process_guess(request.guess)
